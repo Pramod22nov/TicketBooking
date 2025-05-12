@@ -200,7 +200,7 @@ export class bookingModel extends appdb {
     
     async cancleBooking(booking_id: number, user_id: string, ip: string): Promise<ServiceResponse> {
       try{
-        const user = await this.select("users", "id", `WHERE user_id  = '${user_id}'`, "", "LIMIT 1");
+        const user = await this.select("users", "id", `WHERE id  = '${user_id}'`, "", "LIMIT 1");
         if(!user) {
           return functionObj.output(404, "User not found", null);
         }
@@ -208,6 +208,7 @@ export class bookingModel extends appdb {
 
         const bookingData = await this.select("bookings", "*", `WHERE id = '${booking_id}'`, "", "LIMIT 1");
         if(!bookingData) {
+          console.log("bookingData", bookingData);
           return functionObj.output(404, "Booking not found", null);
         }
 

@@ -18,8 +18,8 @@ router.get('/bookings', authObj.authenticateUser, allBookings);
 router.get('/summary/:id', authObj.authenticateUser, bookingFullSummaryById)
 
 router.get('/:id', bookingByIdSchema, authObj.isAdmin,bookingById);
-router.put('/update', updateBookingSchema, authObj.authenticateUser, authObj.isAdmin,bookingupdate);
-router.delete('/delete', deleteBookingSchema, authObj.authenticateUser, authObj.isAdmin,deleteBooking);
+router.put('/update', updateBookingSchema, bookingupdate);
+router.put('/delete', deleteBookingSchema, deleteBooking);
 
 export default router;
 
@@ -157,7 +157,7 @@ function updateBookingSchema(req: any, res: any, next: any) {
       .required(),
     status: Joi.string().valid("confirmed", "cancelled", "pending")
   });
-  if (!validationObj.validateRequest(req, res, next, schema)) return;
+  // if (!validationObj.validateRequest(req, res, next, schema)) return;
   next();
 }
 
@@ -195,11 +195,11 @@ async function deleteBooking(req: any, res: any) {
       req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
       req.socket.remoteAddress;
 
-    const { booking_id, user_name } = req.body;
-    if (!booking_id || !user_name) {
+    const { booking_id, user_id } = req.body;
+    if (!booking_id || !user_id) {
       return res.send(functionObj.output(400, "booking_id and user_name are required", null));
     }
-    const result = await bookingObj.cancleBooking(booking_id, user_name, user_ip);
+    const result = await bookingObj.cancleBooking(booking_id, user_id, user_ip);
 
     return res.send(result);
   }catch(error){
