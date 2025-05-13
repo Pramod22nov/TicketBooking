@@ -21,9 +21,9 @@ export class paymentModel extends appdb {
             const bookingData = await this.select("bookings", "*", `WHERE id = '${booking_id}'`, "", "LIMIT 1");
             
             if(!bookingData) {
-            console.log('====================================');
-            console.log("booking_id", bookingData);
-            console.log('====================================');
+            // console.log('====================================');
+            // console.log("booking_id", bookingData);
+            // console.log('====================================');
             return functionObj.output(404, "Booking not found", null);
             }
             const bookingid = bookingData[0].id;
