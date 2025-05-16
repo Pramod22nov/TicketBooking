@@ -39,14 +39,12 @@ export class bookingModel extends appdb {
         
         const seatQuery = `SELECT id, seat_number, seat_is_booked FROM seats WHERE seat_schedule_id = ${scheduleid} AND seat_number IN (${seat_numbers.map(s => `'${s}'`).join(",")})`;
         const seatData = await this.executeQuery(seatQuery);
-        if (!seatData || seatData.length !== seat_numbers.length) {
+        if (!seatData || seatData.length !== seat_numbers.length || seatData !== 'false') {
           const foundSeatNumbers = seatData.map((s: any) => s.seat_number);
           const missing = seat_numbers.filter(s => !foundSeatNumbers.includes(s));
+          console.log(seatData);
           return functionObj.output(400, `Invalid or unavailable seat_numbers: ${missing.join(', ')}`, null);
         }
-        console.log('====================================');
-        console.log("seatData", seatData);
-        console.log('====================================');
 
         const pricePerSeat: number = scheduleData.schedule_price_per_seat;
         const numberOfSeats = seatData.length;
@@ -83,8 +81,10 @@ export class bookingModel extends appdb {
           })
 
           for (const seat of seatData) {
-            await this.update("seats", { seat_is_booked: true, updated_ip: ip }, `WHERE id = ${seat.id}`);
-          }          
+            let a = await this.update("seats", { seat_is_booked: true, updated_ip: ip }, `WHERE id = ${seat.id}`);
+            // console.log("a",a);
+          }   
+          // console.log("seatdata", seatData);       
         }
 
         return functionObj.output(200, "Booking Created Successfully", {
