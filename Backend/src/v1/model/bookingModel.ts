@@ -39,7 +39,7 @@ export class bookingModel extends appdb {
         
         const seatQuery = `SELECT id, seat_number, seat_is_booked FROM seats WHERE seat_schedule_id = ${scheduleid} AND seat_number IN (${seat_numbers.map(s => `'${s}'`).join(",")})`;
         const seatData = await this.executeQuery(seatQuery);
-        if (!seatData || seatData.length !== seat_numbers.length || seatData !== 'false') {
+        if (!seatData || seatData.length !== seat_numbers.length ) {
           const foundSeatNumbers = seatData.map((s: any) => s.seat_number);
           const missing = seat_numbers.filter(s => !foundSeatNumbers.includes(s));
           console.log(seatData);
