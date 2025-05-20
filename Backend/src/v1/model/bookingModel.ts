@@ -18,7 +18,7 @@ export class bookingModel extends appdb {
         this.uniqueField = 'id';
     }
 
-    async createBooking(user_id: number, from_city: string, to_city: string, date: string,booking_total_price:number = 0, seat_numbers: string[], passengers: any[], ip: string): Promise<ServiceResponse> {
+    async createBooking(user_id: number,schedule_id: number,booking_total_price:number = 0, seat_numbers: string[], passengers: any[], ip: string): Promise<ServiceResponse> {
       try{
         const user = await this.select("users", "id", `WHERE id  = '${user_id}'`, "", "LIMIT 1");
         if(user.error) {
@@ -26,16 +26,12 @@ export class bookingModel extends appdb {
         }
         const userid = user[0].id;
 
-        const schedule = await flightObj.getFlightScheduleByCity(from_city, to_city, date);
-        if(schedule.error) {
+        const schedule = await this.select("flight_schedules", "*", `WHERE id = ${schedule_id}`, "", "LIMIT 1");
+        if (!schedule || schedule.length === 0) {
           return functionObj.output(404, "Schedule not found", null);
         }
-
-        const scheduleData = schedule.data[0];
+        const scheduleData = schedule[0];
         const scheduleid = scheduleData.id;
-        console.log('====================================');
-        console.log("scheduledata", scheduleData);
-        console.log('====================================');
         
         const seatQuery = `SELECT id, seat_number, seat_is_booked FROM seats WHERE seat_schedule_id = ${scheduleid} AND seat_number IN (${seat_numbers.map(s => `'${s}'`).join(",")})`;
         const seatData = await this.executeQuery(seatQuery);
@@ -63,9 +59,6 @@ export class bookingModel extends appdb {
           booking_refund_status: false,
           created_ip: ip
         });
-        console.log('====================================');
-        console.log('bookings',this.query);
-        console.log('====================================');
 
         for (let i = 0; i < passengers.length; i++) {
           const seat = seatData.find((s: { seat_number: string }) => s.seat_number === seat_numbers[i]);
@@ -82,9 +75,9 @@ export class bookingModel extends appdb {
 
           for (const seat of seatData) {
             let a = await this.update("seats", { seat_is_booked: true, updated_ip: ip }, `WHERE id = ${seat.id}`);
-            // console.log("a",a);
+            console.log("a",a);
           }   
-          // console.log("seatdata", seatData);       
+          console.log("seatdata", seatData);       
         }
 
         return functionObj.output(200, "Booking Created Successfully", {
@@ -92,9 +85,6 @@ export class bookingModel extends appdb {
           booking_seats: seat_numbers,
         })
       }catch(error){
-        console.log('====================================');
-        console.log("error", error);
-        console.log('====================================');
         return functionObj.output(500, "Error in creating bookings", error);
       }
     }

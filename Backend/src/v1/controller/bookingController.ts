@@ -55,41 +55,35 @@ async function createBookingController(req: any, res: any) {
     const user_id = req.user?.id;
 
     if (!user_id) {
-      return res
-        .status(401)
-        .send(functionObj.output(401, "Unauthorized: User ID missing from token", null));
+      return res.send(functionObj.output(401, "Unauthorized: User ID missing from token", null));
     }
-   
+
     const {
-      schedule_from_city,
-      schedule_to_city,
-      schedule_date,
+      booking_schedule_id,
       schedule_total_price,
       selected_seats,
-      passengers,
+      passengers
     } = req.body;
 
+    if (!booking_schedule_id || isNaN(Number(booking_schedule_id))) {
+      return res.send(functionObj.output(400, "Invalid or missing booking_schedule_id", null));
+    }
+
     if (!Array.isArray(selected_seats) || selected_seats.length === 0) {
-      return res
-        .status(400)
-        .send(functionObj.output(400, "Invalid or missing selected_seats", null));
+      return res.send(functionObj.output(400, "Invalid or missing selected_seats", null));
     }
 
     if (!Array.isArray(passengers) || passengers.length !== selected_seats.length) {
-      return res
-        .status(400)
-        .send(functionObj.output(400, "Invalid or mismatched passengers", null));
+      return res.send(functionObj.output(400, "Invalid or mismatched passengers", null));
     }
 
     const user_ip =
-      req.headers["x-forweded-for"]?.toString().split(",")[0] ||
+      req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
       req.socket.remoteAddress;
 
     const result = await bookingObj.createBooking(
       user_id,
-      schedule_from_city,
-      schedule_to_city,
-      schedule_date,
+      Number(booking_schedule_id),
       schedule_total_price,
       selected_seats,
       passengers,
