@@ -75,9 +75,7 @@ export class bookingModel extends appdb {
 
           for (const seat of seatData) {
             let a = await this.update("seats", { seat_is_booked: true, updated_ip: ip }, `WHERE id = ${seat.id}`);
-            console.log("a",a);
-          }   
-          console.log("seatdata", seatData);       
+          }       
         }
 
         return functionObj.output(200, "Booking Created Successfully", {
